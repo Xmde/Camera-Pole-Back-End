@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model VehicleType {
+  id    String     @id @default(uuid())
+  name  String @unique
+  plates Plate[]
+}
+
+model Plate {
+  id              String         @id
+  plate           String     @unique
+  vehicle_type_id String
+  vehicle_type    VehicleType @relation(fields: [vehicle_type_id], references: [id])
+  events         Event[]
+}
+
+model Camera {
+  id    String     @id @default(uuid())
+  camera_number Int @unique
+  facing Facing @default(North)
+  events Event[]
+}
+
+model Event {
+  id              String         @id @default(uuid())
+  plate_id        String?
+  plate           Plate?       @relation(fields: [plate_id], references: [id])
+  object_type     ObjectType  @default(Unknown)
+  camera_id       String
+  camera          Camera      @relation(fields: [camera_id], references: [id])
+  timestamp       DateTime    @default(now())
+  image           String
+  direction      Direction @default(Unknown)
+  event_type     EventType
+}
+
+enum EventType {
+  Vehicle
+  Motion
+}
+
+enum Facing {
+  North
+  South
+  East
+  West
+}
+
+enum Direction {
+  Forward
+  Backward
+  Unknown
+}
+
+enum ObjectType {
+  People
+  Bicycle
+  Vehicle
+  Unknown
+  None
+}
